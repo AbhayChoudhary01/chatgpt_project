@@ -1,10 +1,11 @@
-body {
+.login-page-body {
    background: rgb(2, 0, 36);
    background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(3, 75, 27, 1) 78%, rgba(6, 106, 39, 1) 100%);
    color: #d47bd4;
    font-family: monospace, monospace;
    font-size: 17px;
    font-weight: 100;
+   margin: -8px;
 }
 
 .header {
@@ -112,14 +113,18 @@ body {
 
 .form {
    background-color: white;
-   padding: 80px;
+   
+   padding-left: 80px;
+   padding-right: 80px;
+   padding-top: 30px;
+   padding-bottom: 50px;
+
    border-radius: 10px;
    display: flex;
    flex-direction: column;
    align-items: center;
    box-shadow: 5px 5px 15px -1px rgba(0, 0, 0, 0.75);
-   min-height: 400px;
-
+   min-height: 520px;
 }
 
 .form--input {
@@ -163,14 +168,7 @@ body {
 }
 
 .form-switcher-disable {
-   color: black;
-   cursor: pointer;
-   color: black;
-   cursor: pointer;
-   /* CSS for button starts*/
-   background-color: #d47bd4;
    border-radius: 12px;
-   color: #000;
    cursor: pointer;
    font-weight: bold;
    padding: 10px 10px;
@@ -179,7 +177,6 @@ body {
    width: 100%;
    box-sizing: border-box;
    border: 0;
-   font-size: 16px;
    user-select: none;
    -webkit-user-select: none;
    touch-action: manipulation;
@@ -187,7 +184,16 @@ body {
    font-size: 18px;
    font-style: bold;
    letter-spacing: 1px;
-   background-image: linear-gradient(to right, #F27121cc, #E94057cc, #8A2387cc);
+
+
+   /* 
+   cursor: pointer;
+   color: black;
+   cursor: pointer;
+   
+   background-color: #d47bd4;
+   color: #000;
+   background-image: linear-gradient(to right, #F27121cc, #E94057cc, #8A2387cc); */
 
 }
 
