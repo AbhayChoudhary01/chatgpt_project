@@ -1,5 +1,5 @@
 import React from "react"
-
+import { useNavigate } from 'react-router-dom';
 
 export default function Login(props) {
 
@@ -7,9 +7,7 @@ export default function Login(props) {
 
     const [formData, setFormData] = React.useState({
         email: "",
-        password: "",
-        passwordConfirm: "",
-        joinedNewsletter: true
+        password: ""
     })
 
 
@@ -21,14 +19,25 @@ export default function Login(props) {
         }))
     }
 
-    function handleSubmit(event) {
-        event.preventDefault()
-        // if(formData.password === formData.passwordConfirm) {
-        //     console.log("Successfully signed up")
-        // } else {
-        //     console.log("Passwords do not match")
-        //     return
-        // }
+    async function handleSubmit(event) {
+        event.preventDefault();
+        const username = formData.username;
+        const password = formData.password;
+
+        const response = await fetch('http://localhost:5000/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+      
+          if (response.ok) {
+            console.log("logged in success");
+            navigate('/talkgpt');
+          } else {
+            const data = await response.json();
+            console.log("logged in FAIL");
+            console.error(data.message);
+          }
     }
 
     return (

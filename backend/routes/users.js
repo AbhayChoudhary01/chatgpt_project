@@ -57,5 +57,48 @@ router.post('/signup', async (req, res) => {
   }
 })
 
+//EXTRA API FOR questions
+
+router.post('/question_to_gpt', async (req, res) => {
+    console.log("question asked");
+  
+    try {
+      const question = req.body.question;
+      const model = 'text-davinci-003';
+      console.log(question);
+      // return;
+      const response = await axios.post('https://api.openai.com/v1/engines/' + model + '/completions', {
+        prompt: question,
+        max_tokens: 200,
+        temperature: 0.5,
+        n: 1
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        }
+      });
+  
+      const answer = response.data.choices[0].text;
+  
+      res.json({ answer });
+  
+      // console.log(answer);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while processing your request.' });
+    }
+  });
+  
+  
+  
+  router.route('/test').post((req, res) => {
+  
+    console.log("Test api called");
+  
+    res.status(200).json({ message: 'Login successful!' });
+    return;
+  });
+  
 
 module.exports = router; 
