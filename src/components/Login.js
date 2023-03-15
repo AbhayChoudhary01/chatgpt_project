@@ -2,12 +2,13 @@ import React from "react"
 import { useNavigate } from 'react-router-dom';
 
 export default function Login(props) {
+    const navigate = useNavigate();
 
     const displayEle = props.isLogin ? "block" : "none";
 
     const [formData, setFormData] = React.useState({
-        email: "",
-        password: ""
+        username: "",
+        password: "",
     })
 
 
@@ -19,7 +20,7 @@ export default function Login(props) {
         }))
     }
 
-    async function handleSubmit(event) {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const username = formData.username;
         const password = formData.password;
@@ -38,7 +39,7 @@ export default function Login(props) {
             console.log("logged in FAIL");
             console.error(data.message);
           }
-    }
+    };
 
     return (
         <div className="form-container" style={{ display: displayEle }}>
@@ -48,12 +49,12 @@ export default function Login(props) {
                     <span className="form-switcher-disable" onClick={props.handleClick}>Sign up</span>
                 </div>
                 <input
-                    type="email"
-                    placeholder="Email address"
+                    type="username"
+                    placeholder="username"
                     className="form--input"
-                    name="email"
+                    name="username"
                     onChange={handleChange}
-                    value={formData.email}
+                    value={formData.username}
                 />
                 <input
                     type="password"
