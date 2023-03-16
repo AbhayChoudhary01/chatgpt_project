@@ -22,27 +22,25 @@ export default function LeftBox() {
 
 
     return (
-        <div className="form--content">
-            <form className="form" 
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSubmit(question);
-                }
-            }>
+        <div className="form-area-content">
 
+            <div className="form-textbox">
                 <input
                     type="text"
-                    className="form--input"
-                    name="email"
-
+                    className="ques--input"
+                    name="ques"
                     value={question}
                     onChange={(e) => setPrompt(e.target.value)}
                 />
-
-                <button type="submit" className="button-85" role="button">ask</button>
-                <br/>
-                <span>response : {got_ans}</span>
-            </form>
+            
+            </div>
+            <div className="send-icon">
+                <img alt="send" src="images/send.png" width="30px"/>
+            </div>
+            <div className="send-icon">
+                <img alt="send" src="images/mic.png" width="14px"/>
+            </div>
+            
         </div>
     )
 };
