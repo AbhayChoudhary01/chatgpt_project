@@ -47,7 +47,7 @@ function authenticateToken(req, res, next) {
 
     if (refreshToken == null) return res.status(403).send("token Expired, refresh token not provided");
 
-    if (refreshTokens.includes(refreshToken)) {
+    if (!refreshTokens.includes(refreshToken)) {
       // console.log(refreshTokens);
       return res.status(403).send("refresh token not found in the list")
     }
@@ -80,30 +80,71 @@ function authenticateToken(req, res, next) {
 //LOGIN API
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  console.log(req.body);
 
-  try {
-    const user = await User.findOne({ username, password });
-    console.log("done");
-    if (user) {
-      console.log("connecting mere bhai");
-      res.status(200).send({ message: 'Login successful!' });
-      console.log("ho gya mere bhai");
+const user = await User.findOne({username});
+if(user == null)
+{
+  return res.status(400).send("user not found")
+}
 
-    } else {
-      res.status(401).send({ message: 'Invalid username or password' });
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ message: 'Server error' });
+const forJWTsign = {username};
+console.log(forJWTsign);
+try
+{
+  if(await bcrypt.compare(password, user.password))
+  {
+    console.log('Password Success, generating access token')
+    const accessToken = generateAccessToken(forJWTsign);
+    const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET);
+
+    refreshTokens.push(refreshToken)
+
+    return res.status(200).send({accessToken: accessToken, refreshToken: refreshToken});
   }
+  else
+  {
+    return res.status(401).send('Incorrect Password')
+  }
+}
+catch(err)
+{
+  console.log(err);
+  res.status(500).send("something went wrong");
+}
+})
+//   try {
+//     const user = await User.findOne({ username, password });
+//     console.log("done");
+//     if (user) {
+//       console.log("connecting mere bhai");
+//       res.status(200).send({ message: 'Login successful!' });
+//       console.log("ho gya mere bhai");
+
+//     } else {
+//       res.status(401).send({ message: 'Invalid username or password' });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send({ message: 'Server error' });
+//   }
+
+//LOGOUT API 
+router.delete('/logout', (req, res) => {
+  console.log("______DELETE_____");
+  // console.log("before")
+  // console.log(refreshTokens)
+
+  refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+
+  // console.log("after")
+  // console.log(refreshTokens)
+  res.sendStatus(204)
 })
 
 //SIGNUP API 
 router.post('/signup', async (req, res) => {
   const { username, password, email } = req.body;
-  console.log(req.body);
-
+  
   //find for duplicate user 
   const user = await User.findOne({ username });
   if (user) {
@@ -119,18 +160,55 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    const newUser = new User({ username, password, email });
+    const hashedPassword = await bcrypt.hash(password,10)
+    const newUser = new User({ username, password:hashedPassword, email });
     console.log("User added successfully");
 
+    try
+    {
     newUser.save()
-      .then(() => res.json('User added!'))
-      .catch(err => res.status(400).json('Error: ' + err));
+    console.log("new user added")
+    }
 
-  } catch (err) {
+    catch (err) 
+    {
     console.error(err);
-    res.status(500).send({ message: 'Server error' });
+    res.status(400).send({ message: JSON.stringify('Error: ' + err) })
+    return;
+    }
+
+    //returning refresh and access tokens
+    const forJWTsign = {username};
+    const accessToken = generateAccessToken(forJWTsign);
+    const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET)
+    refreshTokens.push(refreshToken)
+    return res.status(200).send({ accessTOken: accessToken, refreshToken: refreshToken })
+  }
+  catch (err){
+    console.log(err);
+    res.status(500).send({ message: 'Server error' })
   }
 })
+
+//******************      DATA APIS       ******************
+
+//API TO GET DATA 
+router.post('/dataapi', authenticateToken, (req,res) => {
+  console.log("______DATA-API_____");
+
+  // authenticateToken is the middleware here to check token before moving on 
+
+  //will enter this function only when reurned successfully from middleware 
+  console.log("authinticated")
+
+  // now do data work here
+
+  const data = 
+  {
+    newToken :req.newToken
+  }
+  return res.json(data);
+});
 
 //EXTRA API FOR questions
 

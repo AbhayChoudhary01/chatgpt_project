@@ -12,15 +12,18 @@ app.use(express.json());
 mongoose.set("strictQuery", false);
 
 const uri = process.env.ATLAS_URI;
-mongoose.connect(uri, {});
+mongoose.connect(uri, {}
+);
 const connection = mongoose.connection;
 connection.once('open', () => {
   console.log("MongoDB database connection established successfully");
 })
 
 const usersRouter = require('./routes/users');
+const chatRouter = require('./routes/chat');
 
 app.use('/users', usersRouter);
+app.use('/chat', chatRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
