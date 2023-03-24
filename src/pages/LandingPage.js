@@ -1,9 +1,35 @@
 import React from "react"
 import ChatGPTdiv from '../components/ChatGPTdiv.js'
+import ChatHistory from '../components/ChatHistory.js'
 import '../css/LandingPage.css'
 import { Link } from 'react-router-dom';
+import Cookies from "universal-cookie"
 
-export default function Testpage() {
+const cookies = new Cookies();
+
+export default function LandingPage() {
+
+    //LOGOUT HANDLER
+    const logoutUser = async () => {
+        console.log("logging out");
+
+        const token = cookies.get("refreshToken");
+        cookies.remove("accessToken");
+        cookies.remove("refreshToken");
+
+        const response = await fetch('http://localhost:5000/users/logout', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+          });
+          if (response.ok) {
+            console.log("logout success");
+          }
+          else{
+            console.log("server issue in logout, check")
+          }
+    }
+
     return (
         <div>
             <div className="sidebar">
@@ -23,19 +49,26 @@ export default function Testpage() {
                         <img alt="contact-img" src="images/contact.png" width="18px" style={{ marginRight: "10px" }} /><span className="sidebar-text" href="#contact_developers">Contact Developers</span>
                     </a>
                 </div>
-                <div className="sidebar--content">
+                <div className="sidebar--content" onClick={logoutUser}>
                     <Link to="/">
                         <img alt="logout-img" src="images/logout.png" width="18px" style={{ marginRight: "10px" }} /><span className="sidebar-text" href="#log_out">Log Out</span>
                     </Link>
+                </div>
+                <div className="sidebar--content">
+                    <a href="#contact">
+                        <img alt="logout-img" src="images/logout.png" width="18px" style={{ marginRight: "10px" }} /><span className="sidebar-text" href="#log_out">Get Data</span>                    
+                    </a>
                 </div>
             </div>
 
             <div className="content">
                 <div className="chat-area">
-                    chat area 
+                    <div className="chat-area-child">
+                        <ChatHistory/>
+                    </div>
                 </div>
                 <div className="form-area">
-                    <ChatGPTdiv />
+                        <ChatGPTdiv />
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 let User = require('../models/user.model');
+let Chat = require('../models/chat.model');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -79,6 +80,8 @@ function authenticateToken(req, res, next) {
 
 //LOGIN API
 router.post('/login', async (req, res) => {
+  console.log("______LOGIN_____");
+
   const { username, password } = req.body;
 
 const user = await User.findOne({username});
@@ -98,6 +101,8 @@ try
     const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET);
 
     refreshTokens.push(refreshToken)
+    console.log(refreshToken)
+    console.log(refreshTokens)
 
     return res.status(200).send({accessToken: accessToken, refreshToken: refreshToken});
   }
@@ -143,6 +148,8 @@ router.delete('/logout', (req, res) => {
 
 //SIGNUP API 
 router.post('/signup', async (req, res) => {
+  console.log("_____SIGNUP_____")
+
   const { username, password, email } = req.body;
   
   //find for duplicate user 
@@ -170,11 +177,23 @@ router.post('/signup', async (req, res) => {
     console.log("new user added")
     }
 
-    catch (err) 
+    catch
     {
-    console.error(err);
     res.status(400).send({ message: JSON.stringify('Error: ' + err) })
     return;
+    }
+
+    //Initialize chat as well
+    const newChat = new Chat({username});
+
+    try{
+      newChat.save()
+      console.log('Chat initialized')
+    }
+    catch{
+      console.log("can't create chat")
+      res.status(400).send({ message : JSON.stringify('Error: ' + err)})
+      return;
     }
 
     //returning refresh and access tokens
@@ -210,10 +229,9 @@ router.post('/dataapi', authenticateToken, (req,res) => {
   return res.json(data);
 });
 
-//EXTRA API FOR questions
-
-router.post('/question_to_gpt', async (req, res) => {
-  console.log("question asked");
+//API FOR questions
+router.post('/question_to_gpt', authenticateToken, async (req, res) => {
+  console.log("______QUESTION-ASK_____");
 
   try {
     const question = req.body.question;
@@ -233,15 +251,84 @@ router.post('/question_to_gpt', async (req, res) => {
     });
 
     const answer = response.data.choices[0].text;
+    console.log(answer);
 
-    res.json({ answer });
+    let retVal = addChatInDatabase(req.usernam, question, answer);
+
+    if(retVal===0)
+    {
+      console.log("user chat not saved")
+      return res.status(403).json({ answer });
+    }
+    else  console.log("qn added")
+
+    return res.status(200).json({ answer });
 
     // console.log(answer);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred while processing your request.' });
+    return res.status(500).json({ error: 'An error occurred while processing your request.' });
   }
 });
+
+//function 
+const addChatInDatabase = async (username, qn, ans) => {
+  const usr = await User.findOne({username});
+
+  if(!usr) return 0;
+
+  try {
+    const userChat =  await Chat.findOne({username});
+
+    userChat.qnaData.push(qn);
+    userChat.qnaData.push(ans);
+    userChat.save();
+    return 1;
+  } catch (err) {
+    return 0;
+  }
+}
+
+router.post('/createdb', async (req, res) => {
+  console.log("new cdsd");
+  const { qn, username } = req.body;
+    console.log(username);
+    const newArray = [];
+    const newChat = new Chat({username });
+
+    try{
+      newChat.save()
+      console.log('Chat initialized!')
+    }
+    catch{
+      res.status(400).send({ message : JSON.stringify('Error: ' + err)})
+      return;
+    }
+    res.status(200).json({ result: "pass" });
+    return;
+});
+
+
+//GET HISTORY OF CHAT ON first page load 
+router.post('/getChatHistory', authenticateToken, async(req,res) => {
+  console.log("got name : ",req.usernam)
+  const userChat = await Chat.findOne({username:req.usernam});
+  if(userChat)
+  {
+    console.log( userChat.qnaData);
+    const data = 
+    {
+      newToken :req.newToken,
+      arr :  userChat.qnaData
+    }
+    return res.json(data);
+  }
+  else
+  {
+    console.log("some error occured!");
+    return res.status(403).send({ message: "user's chat not found" });
+  }
+})
 
 
 
