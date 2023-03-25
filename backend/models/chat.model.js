@@ -9,7 +9,6 @@ const questionSchema = new mongoose.Schema({
     }, 
     qnaData:{
         type: [String],
-        required: true,
         default: []
     }
 });

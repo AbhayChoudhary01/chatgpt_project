@@ -10,11 +10,12 @@ let refreshTokens = []
 // ******************    UTILITY FUNCTIONS      ******************
 function generateAccessToken(data) {
   console.log("generate fn");
-  console.log(data);
+  // console.log(data);
   return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' })
 }
 
 function authenticateToken(req, res, next) {
+  console.log("---authenticateToken function---")
   // const authHeader = req.headers['authorization']
   // const token = authHeader && authHeader.split(' ')[1]
   // //Bearer TOKEN 
@@ -75,6 +76,7 @@ function authenticateToken(req, res, next) {
     }
   }
 }
+
 
 
 //******************      AUTH APIS       ******************
@@ -171,7 +173,7 @@ router.post('/signup', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password,10)
     const newUser = new User({ username, password:hashedPassword, email });
-    console.log("User added successfully");
+    // console.log("User added successfully");
 
     try
     {
@@ -238,6 +240,8 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
 
     let answer = response.data.choices[0].text;
     console.log(answer);
+    answer = answer.replace(/^\n+/g, "");
+    answer = answer.replace(/\n/g, "<br>");
 
     let retVal = addChatInDatabase(req.usernam, question, answer);
 
@@ -252,6 +256,7 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
 
     // console.log(answer);
   } catch (error) {
+    console.log("api to ask question failed ");
     console.error(error);
     return res.status(500).json({ error: 'An error occurred while processing your request.' });
   }
@@ -349,7 +354,7 @@ router.post('/dataapi', authenticateToken, (req,res) => {
   // authenticateToken is the middleware here to check token before moving on 
 
   //will enter this function only when reurned successfully from middleware 
-  console.log("authinticated")
+  console.log("authenticated")
 
   // now do data work here
 
