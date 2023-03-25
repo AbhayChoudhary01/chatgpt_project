@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef, useEffect } from "react";
 import ChatGPTdiv from '../components/ChatGPTdiv.js'
 import ChatHistory from '../components/ChatHistory.js'
 import '../css/LandingPage.css'

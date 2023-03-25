@@ -24,6 +24,7 @@ function authenticateToken(req, res, next) {
   //     if(err) return res.sendStatus(403)
   //     req.user = user
   //     next()
+  req.returnTOken = req.headers['authorization'];
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1]
   // BEARER TOKEN 
@@ -103,6 +104,7 @@ try
     refreshTokens.push(refreshToken)
     console.log(refreshToken)
     console.log(refreshTokens)
+    console.log("user login valid: " , username)
 
     return res.status(200).send({accessToken: accessToken, refreshToken: refreshToken});
   }
@@ -209,25 +211,9 @@ router.post('/signup', async (req, res) => {
   }
 })
 
+
+
 //******************      DATA APIS       ******************
-
-//API TO GET DATA 
-router.post('/dataapi', authenticateToken, (req,res) => {
-  console.log("______DATA-API_____");
-
-  // authenticateToken is the middleware here to check token before moving on 
-
-  //will enter this function only when reurned successfully from middleware 
-  console.log("authinticated")
-
-  // now do data work here
-
-  const data = 
-  {
-    newToken :req.newToken
-  }
-  return res.json(data);
-});
 
 //API FOR questions
 router.post('/question_to_gpt', authenticateToken, async (req, res) => {
@@ -250,7 +236,7 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
       }
     });
 
-    const answer = response.data.choices[0].text;
+    let answer = response.data.choices[0].text;
     console.log(answer);
 
     let retVal = addChatInDatabase(req.usernam, question, answer);
@@ -332,13 +318,48 @@ router.post('/getChatHistory', authenticateToken, async(req,res) => {
 
 
 
-router.route('/test').post((req, res) => {
+//******************      TEST/SAMPLE API       ******************
+///THIS FORMAT SHOULD BE FOLLOWED BY ALL THE API THAT WILL BE WRITTEN 
+router.route('/test').post(authenticateToken, (req, res) => {
+  console.log("______test api_____");
+  var d = new Date(); //data 
 
-  console.log("Test api called");
-
-  res.status(200).json({ message: 'Login successful!' });
-  return;
+  const data = 
+  {
+    newToken :req.newToken,
+    text : "date"+d
+  }
+  return res.status(200).json(data);
 });
+
+
+//TEST API FOR SENDING SAMPLE DATA ON QUESTION ASK 
+router.post('/testApp', async (req, res) => {
+  console.log("______TEST-ASK_____");
+  const question = req.body.question;
+  console.log(question);
+  answer = "hehehehehhe";
+  return res.status(200).json({ answer });
+});
+
+//API TO GET DATA 
+router.post('/dataapi', authenticateToken, (req,res) => {
+  console.log("______DATA-API_____");
+
+  // authenticateToken is the middleware here to check token before moving on 
+
+  //will enter this function only when reurned successfully from middleware 
+  console.log("authinticated")
+
+  // now do data work here
+
+  const data = 
+  {
+    newToken :req.newToken
+  }
+  return res.json(data);
+});
+
 
 
 module.exports = router; 
