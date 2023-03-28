@@ -25,7 +25,7 @@ function authenticateToken(req, res, next) {
   //     if(err) return res.sendStatus(403)
   //     req.user = user
   //     next()
-  req.returnTOken = req.headers['authorization'];
+  req.returnToken = req.headers['authorization'];
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1]
   // BEARER TOKEN 
@@ -34,8 +34,10 @@ function authenticateToken(req, res, next) {
 
   try {
     const verifyJWTtoken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    if (verifyJWTtoken) {
+    if (verifyJWTtoken) 
+    {
       console.log("token valid!")
+      req.usernam = verifyJWTtoken.username;
       next()
       return;
     }
@@ -58,13 +60,15 @@ function authenticateToken(req, res, next) {
     try {
       const verifyRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-      if (verifyRefreshToken) {
+      if (verifyRefreshToken) 
+      {
         console.log("refresh token valid, creating auth token")
         const username = verifyRefreshToken.username;
         const forJWTsign = { username };
         // console.log(forJWTsign);
         const newAccessToken = generateAccessToken(forJWTsign);
         req.newToken = newAccessToken
+        req.usernam = username
         next();
         return;
       }
@@ -239,6 +243,7 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
     });
 
     let answer = response.data.choices[0].text;
+
     console.log(answer);
     answer = answer.replace(/^\n+/g, "");
     answer = answer.replace(/\n/g, "<br>");
@@ -285,7 +290,7 @@ router.post('/createdb', async (req, res) => {
   const { qn, username } = req.body;
     console.log(username);
     const newArray = [];
-    const newChat = new Chat({username });
+    const newChat = new Chat({ username });
 
     try{
       newChat.save()

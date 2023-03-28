@@ -37,6 +37,7 @@ export default function ChatHistory() {
 
     const chatSnippet = chatHistory.map( (ele, ind)=> {
         return <ChatItem 
+        key = {ind}
         item = {ele} 
         index = {ind}/>
     })
@@ -77,7 +78,7 @@ export function ChatItem(props){
                         <img alt="logout-img" src="images/chat_gpt_logo.png" className="gpt-chat-icon"/>             
                     </div>
                     <div className="question-text-2">
-                        <span key={props.index}>{props.item} {props.index}</span>
+                    <span key={props.index} dangerouslySetInnerHTML={{ __html: props.item }} />
                     </div>
                 </div>
             </div>
