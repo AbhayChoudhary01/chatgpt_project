@@ -119,9 +119,62 @@ export default function LandingPage() {
     }
   };
 
+  //Report Bug 
+  const [enabled, setEnabled] = React.useState(false);
+
+  function showPopup() {
+    setEnabled(!enabled);
+  }
+
+  const [data, setData] = React.useState({ fname: "" });
+
+  function handleChange(event) {
+    // console.log(event.target)
+
+    const { name, value, type, checked } = event.target;
+
+    setData((prevVal) => {
+      return {
+        ...prevVal,
+        [name]: type == "checkbox" ? checked : value,
+      };
+    });
+  }
+
+ 
+
   //RETURN DIV
   return (
     <div>
+
+      <div
+        className="globalDiv"
+        style={enabled ? { top: "10%" } : { top: "-100px" }}
+      >
+        <div className="insidecontent">
+          <form onSubmit={handleSubmit}>
+            <label className="label">
+              {" "}
+              Write a brief description about the bug
+              <input
+                type="text"
+                placeholder="Feedback"
+                onChange={handleChange}
+                name="fname"
+                value={data.fname}
+              />
+            </label>
+            <div className="submitButtons">
+              <button className="button-17">Submit</button>
+              <button className="button-17" onClick={showPopup}>
+                Close
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+
       <div className="sidebar">
         <div className="sidebar--content">
           <a>
@@ -184,8 +237,8 @@ export default function LandingPage() {
               width="18px"
               style={{ marginRight: "10px" }}
             />
-            <span className="sidebar-text">
-              Get Data
+            <span className="sidebar-text" onClick={showPopup}>
+              Report Bug
             </span>
           </a>
         </div>
