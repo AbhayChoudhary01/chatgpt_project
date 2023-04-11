@@ -25,7 +25,6 @@ const AboutSectionTwo = () => {
             <AuthBox />
             </div>
           </div>
-
         </div>
       </div>
     </section>
