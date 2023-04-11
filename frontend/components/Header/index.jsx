@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import ThemeToggler from "./ThemeToggler";
+// import ThemeToggler from "./ThemeToggler";
 
 const Header = () => {
 
@@ -62,7 +62,7 @@ const Header = () => {
                   Demon Login
                 </Link>
                 <div>
-                  <ThemeToggler />
+                  {/* <ThemeToggler /> */}
                 </div>
               </div>
             </div>
