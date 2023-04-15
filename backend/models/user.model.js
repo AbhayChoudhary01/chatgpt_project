@@ -23,6 +23,10 @@ const userSchema = new schema({
         trim: true,  
         minLength: 3
     }, 
+    isGlogin: {
+        type: Boolean,
+        default: false
+    }
 
 }, {
     timestamps: false,

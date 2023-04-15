@@ -34,8 +34,7 @@ function authenticateToken(req, res, next) {
 
   try {
     const verifyJWTtoken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    if (verifyJWTtoken) 
-    {
+    if (verifyJWTtoken) {
       console.log("token valid!")
       req.usernam = verifyJWTtoken.username;
       next()
@@ -60,8 +59,7 @@ function authenticateToken(req, res, next) {
     try {
       const verifyRefreshToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-      if (verifyRefreshToken) 
-      {
+      if (verifyRefreshToken) {
         console.log("refresh token valid, creating auth token")
         const username = verifyRefreshToken.username;
         const forJWTsign = { username };
@@ -91,39 +89,34 @@ router.post('/login', async (req, res) => {
 
   const { username, password } = req.body;
 
-const user = await User.findOne({username});
-if(user == null)
-{
-  return res.status(400).send("user not found")
-}
-
-const forJWTsign = {username};
-console.log(forJWTsign);
-try
-{
-  if(await bcrypt.compare(password, user.password))
-  {
-    console.log('Password Success, generating access token')
-    const accessToken = generateAccessToken(forJWTsign);
-    const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET);
-
-    refreshTokens.push(refreshToken)
-    console.log(refreshToken)
-    console.log(refreshTokens)
-    console.log("user login valid: " , username)
-
-    return res.status(200).send({accessToken: accessToken, refreshToken: refreshToken});
+  const user = await User.findOne({ username });
+  if (user == null) {
+    return res.status(400).send("user not found")
   }
-  else
-  {
-    return res.status(401).send('Incorrect Password')
+
+  const forJWTsign = { username };
+  console.log(forJWTsign);
+  try {
+    if (await bcrypt.compare(password, user.password)) {
+      console.log('Password Success, generating access token')
+      const accessToken = generateAccessToken(forJWTsign);
+      const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET);
+
+      refreshTokens.push(refreshToken)
+      console.log(refreshToken)
+      console.log(refreshTokens)
+      console.log("user login valid: ", username)
+
+      return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
+    }
+    else {
+      return res.status(401).send('Incorrect Password')
+    }
   }
-}
-catch(err)
-{
-  console.log(err);
-  res.status(500).send("something went wrong");
-}
+  catch (err) {
+    console.log(err);
+    res.status(500).send("something went wrong");
+  }
 })
 //   try {
 //     const user = await User.findOne({ username, password });
@@ -159,7 +152,7 @@ router.post('/signup', async (req, res) => {
   console.log("_____SIGNUP_____")
 
   const { username, password, email } = req.body;
-  
+
   //find for duplicate user 
   const user = await User.findOne({ username });
   if (user) {
@@ -175,48 +168,120 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password,10)
-    const newUser = new User({ username, password:hashedPassword, email });
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const newUser = new User({ username, password: hashedPassword, email });
     // console.log("User added successfully");
 
-    try
-    {
-    newUser.save()
-    console.log("new user added")
+    try {
+      newUser.save()
+      console.log("new user added")
     }
 
     catch
     {
-    res.status(400).send({ message: JSON.stringify('Error: ' + err) })
-    return;
+      res.status(400).send({ message: JSON.stringify('Error: ' + err) })
+      return;
     }
 
     //Initialize chat as well
-    const newChat = new Chat({username});
+    const newChat = new Chat({ username });
 
-    try{
+    try {
       newChat.save()
       console.log('Chat initialized')
     }
-    catch{
+    catch {
       console.log("can't create chat")
-      res.status(400).send({ message : JSON.stringify('Error: ' + err)})
+      res.status(400).send({ message: JSON.stringify('Error: ' + err) })
       return;
     }
 
     //returning refresh and access tokens
-    const forJWTsign = {username};
+    const forJWTsign = { username };
     const accessToken = generateAccessToken(forJWTsign);
     const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET)
     refreshTokens.push(refreshToken)
     return res.status(200).send({ accessTOken: accessToken, refreshToken: refreshToken })
   }
-  catch (err){
+  catch (err) {
     console.log(err);
     res.status(500).send({ message: 'Server error' })
   }
 })
 
+//SIGN IN WITH GOOGLE API
+router.post('/signupWithGoogle', async (req, res) => {
+  console.log("______SIGN-IN W GOOGLE______");
+
+  let { username, email } = req.body;
+
+  //find for duplicate email
+  const mail = await User.findOne({ email });
+  if (mail) {
+    console.log("Email exists");
+    if (!mail.isGlogin) {
+      return res.status(401).send({ message: 'Email exists, Login Instead' });
+    }
+
+    //Login user
+    console.log("user id exist, logging in");
+    const forJWTsign = { username };
+    console.log('generating access token')
+    const accessToken = generateAccessToken(forJWTsign);
+    const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET)
+
+    refreshTokens.push(refreshToken)
+    console.log("user login valid: ", username)
+
+    return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
+  }
+
+  //find for duplicate user
+  let user = await User.findOne({ username });
+
+  while (user) {
+    username = username + Math.floor((Math.random() * 10000) + 1);
+    console.log(username);
+    user = await User.findOne({ username });
+  }
+
+  let password = Math.random();
+  try {
+    const newUser = new User({ username, password, email, isGlogin: true });
+
+    try {
+      newUser.save();
+      console.log('new user added!');
+    }
+    catch {
+      res.status(400).send({ message: JSON.stringify('Error: ' + err) })
+      return;
+    }
+
+    //initialize chat as well
+    const newChat = new Chat({ username });
+
+    try {
+      newChat.save()
+      console.log('Chat Initialized!')
+    }
+    catch {
+      console.log("can't create chat")
+      res.status(400).send({ message: JSON.stringify('Error: ' + err) })
+      return;
+    }
+    //returning refresh and access tokens 
+    const forJWTsign = { username };
+    const accessToken = generateAccessToken(forJWTsign);
+    const refreshToken = jwt.sign(forJWTsign, process.env.REFRESH_TOKEN_SECRET)
+    refreshTokens.push(refreshToken)
+    return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send({ message: 'Server error' });
+  }
+})
 
 
 //******************      DATA APIS       ******************
@@ -250,12 +315,11 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
 
     let retVal = addChatInDatabase(req.usernam, question, answer);
 
-    if(retVal===0)
-    {
+    if (retVal === 0) {
       console.log("user chat not saved")
       return res.status(403).json({ answer });
     }
-    else  console.log("qn added")
+    else console.log("qn added")
 
     return res.status(200).json({ answer });
 
@@ -269,12 +333,12 @@ router.post('/question_to_gpt', authenticateToken, async (req, res) => {
 
 //function 
 const addChatInDatabase = async (username, qn, ans) => {
-  const usr = await User.findOne({username});
+  const usr = await User.findOne({ username });
 
-  if(!usr) return 0;
+  if (!usr) return 0;
 
   try {
-    const userChat =  await Chat.findOne({username});
+    const userChat = await Chat.findOne({ username });
 
     userChat.qnaData.push(qn);
     userChat.qnaData.push(ans);
@@ -288,39 +352,37 @@ const addChatInDatabase = async (username, qn, ans) => {
 router.post('/createdb', async (req, res) => {
   console.log("new cdsd");
   const { qn, username } = req.body;
-    console.log(username);
-    const newArray = [];
-    const newChat = new Chat({ username });
+  console.log(username);
+  const newArray = [];
+  const newChat = new Chat({ username });
 
-    try{
-      newChat.save()
-      console.log('Chat initialized!')
-    }
-    catch{
-      res.status(400).send({ message : JSON.stringify('Error: ' + err)})
-      return;
-    }
-    res.status(200).json({ result: "pass" });
+  try {
+    newChat.save()
+    console.log('Chat initialized!')
+  }
+  catch {
+    res.status(400).send({ message: JSON.stringify('Error: ' + err) })
     return;
+  }
+  res.status(200).json({ result: "pass" });
+  return;
 });
 
 
 //GET HISTORY OF CHAT ON first page load 
-router.post('/getChatHistory', authenticateToken, async(req,res) => {
-  console.log("got name : ",req.usernam)
-  const userChat = await Chat.findOne({username:req.usernam});
-  if(userChat)
-  {
-    console.log( userChat.qnaData);
-    const data = 
+router.post('/getChatHistory', authenticateToken, async (req, res) => {
+  console.log("got name : ", req.usernam)
+  const userChat = await Chat.findOne({ username: req.usernam });
+  if (userChat) {
+    console.log(userChat.qnaData);
+    const data =
     {
-      newToken :req.newToken,
-      arr :  userChat.qnaData
+      newToken: req.newToken,
+      arr: userChat.qnaData
     }
     return res.json(data);
   }
-  else
-  {
+  else {
     console.log("some error occured!");
     return res.status(403).send({ message: "user's chat not found" });
   }
@@ -334,10 +396,10 @@ router.route('/test').post(authenticateToken, (req, res) => {
   console.log("______test api_____");
   var d = new Date(); //data 
 
-  const data = 
+  const data =
   {
-    newToken :req.newToken,
-    text : "date"+d
+    newToken: req.newToken,
+    text: "date" + d
   }
   return res.status(200).json(data);
 });
@@ -353,7 +415,7 @@ router.post('/testApp', async (req, res) => {
 });
 
 //API TO GET DATA 
-router.post('/dataapi', authenticateToken, (req,res) => {
+router.post('/dataapi', authenticateToken, (req, res) => {
   console.log("______DATA-API_____");
 
   // authenticateToken is the middleware here to check token before moving on 
@@ -363,9 +425,9 @@ router.post('/dataapi', authenticateToken, (req,res) => {
 
   // now do data work here
 
-  const data = 
+  const data =
   {
-    newToken :req.newToken
+    newToken: req.newToken
   }
   return res.json(data);
 });
