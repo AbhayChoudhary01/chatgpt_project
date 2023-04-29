@@ -138,7 +138,7 @@ a:hover {
     font-family: sans-serif;
     font-size: 18px;
     font-style: bold;
-    letter-spacing: 1px;
+    letter-spacing: 1px; 
     background-image: linear-gradient(to right, #F27121cc, #E94057cc, #8A2387cc);
     text-decoration: underline;
   }

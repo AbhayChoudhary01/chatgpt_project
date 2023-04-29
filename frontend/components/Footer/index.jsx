@@ -1,9 +1,38 @@
-import Image from "next/image";
-import Link from "next/link";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useTheme } from "next-themes";
 
 const Footer = () => {
+  const { theme, setTheme } = useTheme();
+  
+  function showAlert(e){
+    console.log("alert", theme);
+    e.preventDefault()
+    toast.info('Coming soon!', {
+      position: "top-center",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: theme,
+      });
+  }
   return (
     <>
+      <ToastContainer
+        position="top-center"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <footer
         className="wow fadeInUp relative z-10 bg-primary bg-opacity-5 pt-16 md:pt-20 lg:pt-24"
         data-wow-delay=".1s"
@@ -21,6 +50,7 @@ const Footer = () => {
                 <div className="flex items-center">
                   <a
                     href="/"
+                    onClick={showAlert}
                     aria-label="social-link"
                     className="mr-6 text-[#CED3F6] hover:text-primary"
                   >
@@ -35,6 +65,7 @@ const Footer = () => {
                   </a>
                   <a
                     href="/"
+                    onClick={showAlert}
                     aria-label="social-link"
                     className="mr-6 text-[#CED3F6] hover:text-primary"
                   >
@@ -49,6 +80,7 @@ const Footer = () => {
                   </a>
                   <a
                     href="/"
+                    onClick={showAlert}
                     aria-label="social-link"
                     className="mr-6 text-[#CED3F6] hover:text-primary"
                   >
@@ -63,6 +95,7 @@ const Footer = () => {
                   </a>
                   <a
                     href="/"
+                    onClick={showAlert}
                     aria-label="social-link"
                     className="mr-6 text-[#CED3F6] hover:text-primary"
                   >
@@ -88,6 +121,7 @@ const Footer = () => {
                   <li>
                     <a
                       href="/"
+                      onClick={showAlert}
                       className="mb-4 inline-block text-base font-medium text-body-color hover:text-primary"
                     >
                       {" "}
@@ -97,6 +131,7 @@ const Footer = () => {
                   <li>
                     <a
                       href="/"
+                      onClick={showAlert}
                       className="mb-4 inline-block text-base font-medium text-body-color hover:text-primary"
                     >
                       {" "}
@@ -106,6 +141,7 @@ const Footer = () => {
                   <li>
                     <a
                       href="/"
+                      onClick={showAlert}
                       className="mb-4 inline-block text-base font-medium text-body-color hover:text-primary"
                     >
                       {" "}
@@ -121,7 +157,7 @@ const Footer = () => {
         <div className="bg-primary/10 py-8">
           <div className="container">
             <p className="text-center text-base text-body-color dark:text-white">
-              ChatGPT based project using MERN
+              MERN project
             </p>
           </div>
         </div>
