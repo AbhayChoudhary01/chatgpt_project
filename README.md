@@ -1,1 +1,1 @@
-changes for gemini
+chat gpt voice project 
